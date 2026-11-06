@@ -2,7 +2,7 @@
 
 A 3D map of central Weimar. Click a point and it shows how far you can walk in 5, 10 and 15 minutes, who lives there, how far it is to food, health and school, and the shadiest way to them at the time of day you choose. It also shows which residents miss out.
 
-Live page: https://bserracan-eng.github.io/ai-in-design/
+Live page: https://bserracan.github.io/needs-in-shade/
 
 ## Run it
 
