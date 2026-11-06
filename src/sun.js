@@ -1,12 +1,26 @@
 const RAD = Math.PI / 180
 
-// The dates you can choose. Weimar's clock runs 2 hours ahead of UTC in summer, 1 in winter.
-export const DAYS = [
-  { label: '1 June', date: Date.UTC(2026, 5, 1), utcOffset: 2 },
-  { label: '21 June', date: Date.UTC(2026, 5, 21), utcOffset: 2 },
-  { label: '21 Sept', date: Date.UTC(2026, 8, 21), utcOffset: 2 },
-  { label: '21 Dec', date: Date.UTC(2026, 11, 21), utcOffset: 1 },
+// Shortcuts to useful dates, as the day's number in the year.
+export const QUICK_DAYS = [
+  { label: '1 June', number: 152 },
+  { label: '21 June', number: 172 },
+  { label: '21 Sept', number: 264 },
+  { label: '21 Dec', number: 355 },
 ]
+
+// Summer time in 2026 runs from 29 March to 25 October: Weimar's clock is then 2 hours ahead of UTC, otherwise 1.
+const SUMMER_TIME_START = Date.UTC(2026, 2, 29)
+const SUMMER_TIME_END = Date.UTC(2026, 9, 25)
+
+// A day of the year, from 1 (1 January) to 365 (31 December).
+export function dayFromNumber(number) {
+  const date = Date.UTC(2026, 0, number)
+  return {
+    date,
+    utcOffset: date >= SUMMER_TIME_START && date < SUMMER_TIME_END ? 2 : 1,
+    label: new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' }),
+  }
+}
 
 // Below this height the sun is too low to give a useful shadow, so the time slider stops there.
 const LOWEST_SUN = 3 * RAD

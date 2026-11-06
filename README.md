@@ -16,7 +16,7 @@ npm run dev     start the app at http://localhost:5173
 1. Click anywhere on the map to set your start.
 2. Click an orange, pink or blue building to see the fastest and the shadiest way to that place.
 3. Click a number under "Who misses out" to see those residents on the map.
-4. Change the date and the time to see how the shade moves.
+4. Change the date and the time to see the buildings' shadows move across the city.
 
 ## Method
 
@@ -24,7 +24,7 @@ npm run dev     start the app at http://localhost:5173
 - **Areas.** The street segments reached in 5, 10 and 15 minutes, including the reachable part of the last segment, with a band of 25 m on each side, joined into one shape. A building counts if it touches the shape.
 - **Residents in an area.** For each overlapping census cell, its population times the share of the cell's area inside. Added up and rounded to the nearest 10. Cells without a published figure aren't zero: they are left out, and the count of them is shown next to the sum.
 - **Daily needs.** A building counts as a place for food, health or school if that is its main use, or if it has at least 50 m² of that use. Food is `food_and_drink`, health is `health`, school is `education`.
-- **Sun and shade.** The sun's position is calculated for Weimar's location and the chosen date and clock time. Every 5 m along a street, the app follows the line from head height (1.5 m) towards the sun over a 2 m grid of building heights. If a building is taller than that line, the point is in shade.
+- **Sun and shade.** The sun's position is calculated for Weimar's location and the chosen date and clock time, any day of the year, and it casts the shadows on the map. Every 5 m along a street, the app follows the line from head height (1.5 m) towards the sun over a 2 m grid of building heights. If a building is taller than that line, the point is in shade.
 - **Shadiest way.** Of all walks of up to 15 minutes, the one with the fewest metres in the sun. The map also shows the fastest way, dashed.
 - **Who misses out.** Each census cell is split into 25 squares that share its residents equally, and each square walks from its nearest node. Three tests: more than 15 minutes from the need, more than 5 minutes from it, or no way there within 15 minutes with under 100 m in full sun.
 
@@ -43,11 +43,11 @@ At 15 minutes, nobody in the kit misses out on food, health or school: from ever
 
 ## Style
 
-The look follows a colour-block style guide for architectural diagrams. Three parts of it are deliberately left out because the kit can't support them:
+The look follows a colour-block style guide for architectural diagrams, with three deliberate differences:
 
 - Roofs are flat, as the kit has one height per building and no roof shapes.
 - Trees, hedges and garden furniture aren't drawn. Invented trees would suggest shade the app doesn't calculate. Thin green lines show the plot boundaries instead.
-- There are no cast shadows on the ground, as the guide asks. Shade shows on the streets instead: white in the sun, slate in shade.
+- The guide asks for no cast shadows, but this map is about shade, so buildings cast real shadows. Streets also show it: white in the sun, slate in shade.
 
 The guide's colours are for housing types, which the kit doesn't record, so they are given to building uses.
 

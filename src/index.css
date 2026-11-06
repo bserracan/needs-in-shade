@@ -162,11 +162,19 @@ input:focus-visible {
   padding: 4px 10px;
 }
 
+.date,
 .time {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-top: 10px;
+}
+
+.date span {
+  min-width: 96px;
+  font-family: var(--condensed);
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .time span {
@@ -176,6 +184,7 @@ input:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.date input,
 .time input {
   flex: 1;
   min-width: 0;

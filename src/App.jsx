@@ -5,7 +5,7 @@ import Scene from './Scene.jsx'
 import { buildCity, computeShade, shadeShare, sunnyMetres } from './city.js'
 import { findStart, walk } from './walk.js'
 import { NEEDS, TESTS, buildNeeds, waysToNeeds, waysToPlace, whoMissesOut } from './needs.js'
-import { DAYS, clockTime, compassWord, daylight, sunAt, sunDirection } from './sun.js'
+import { QUICK_DAYS, clockTime, compassWord, dayFromNumber, daylight, sunAt, sunDirection } from './sun.js'
 import { GROUND, REACH, STREET_SHADE, STREET_SUN, USE_GROUPS } from './palette.js'
 
 const ATTRIBUTION =
@@ -97,6 +97,9 @@ function Legend() {
         </li>
         <li>
           <span className="line thick" style={{ background: STREET_SHADE }} /> Street in shade
+        </li>
+        <li>
+          <span className="swatch" style={{ background: '#dae0ce' }} /> Shadow of a building
         </li>
         <li>
           <span className="swatch" style={{ background: GROUND.recreation }} /> Park or green space
@@ -312,7 +315,7 @@ function WhoMissesOut({ who, needs, chosen, onChoose }) {
 export default function App() {
   const [raw, setRaw] = useState(null)
   const [error, setError] = useState(null)
-  const [dayIndex, setDayIndex] = useState(0)
+  const [dayNumber, setDayNumber] = useState(QUICK_DAYS[0].number)
   const [minutes, setMinutes] = useState(17 * 60)
   const [start, setStart] = useState(null)
   const [place, setPlace] = useState(null)
@@ -326,7 +329,7 @@ export default function App() {
   const city = useMemo(() => raw && buildCity(raw), [raw])
   const needs = useMemo(() => city && buildNeeds(city), [city])
 
-  const day = DAYS[dayIndex]
+  const day = useMemo(() => dayFromNumber(dayNumber), [dayNumber])
   const range = useMemo(() => city && daylight(day, city.center), [city, day])
   const time = range ? Math.min(range.end, Math.max(range.start, minutes)) : minutes
 
@@ -379,7 +382,7 @@ export default function App() {
       <section className="panel">
         <header>
           <h1>Daily needs in the shade</h1>
-          <p className="subtitle">Weimar: what is within 15 minutes, who misses out, and the shadiest way there</p>
+          <p className="subtitle">Assessing Access to Daily Needs, Spatial Inequalities and Heat-Resilient Walking Routes in Weimar’s 15-Minute City</p>
         </header>
 
         {notice && <p className="hint alert">{notice}</p>}
@@ -402,12 +405,28 @@ export default function App() {
 
         <h2>Sun</h2>
         <div className="chips">
-          {DAYS.map((d, i) => (
-            <button key={d.label} className={i === dayIndex ? 'active' : ''} aria-pressed={i === dayIndex} onClick={() => setDayIndex(i)}>
+          {QUICK_DAYS.map((d) => (
+            <button
+              key={d.number}
+              className={d.number === dayNumber ? 'active' : ''}
+              aria-pressed={d.number === dayNumber}
+              onClick={() => setDayNumber(d.number)}
+            >
               {d.label}
             </button>
           ))}
         </div>
+        <label className="date">
+          <span>{day.label}</span>
+          <input
+            type="range"
+            aria-label="Date"
+            min={1}
+            max={365}
+            value={dayNumber}
+            onChange={(e) => setDayNumber(Number(e.target.value))}
+          />
+        </label>
         <label className="time">
           <span>{clockTime(time)}</span>
           <input
@@ -436,6 +455,7 @@ export default function App() {
             the nearest 10. Cells without a figure aren't zero, so they are left out and counted next to the sum.
           </li>
           <li>
+            The sun's position comes from the date, the clock time and Weimar's location, and it casts the shadows you see.
             A street is in shade if a building blocks the line from a person's head (1.5 m up) to the sun, tested every 5 m.
             The shadiest way is the walk of up to 15 minutes, to any place with that need, with the fewest metres in the sun.
           </li>

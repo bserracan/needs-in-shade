@@ -4,6 +4,11 @@ import { Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { GROUND, OUTSIDE, PLOT_LINE, REACH, STREET_SHADE, STREET_SUN, USE_GROUPS } from './palette.js'
 
+const SUN_DISTANCE = 2500 // far enough to light the whole kit
+const SHADOW_REACH = 1400 // half the width of the area that gets shadows, in metres
+const SHADOW_COLOR = '#2c3550'
+const SHADOW_STRENGTH = 0.1 // how dark shadows are: 10% shadow colour, 90% see-through
+
 // Metres in the app are x east, y north. In the 3D scene y is up, so north becomes -z.
 
 const toColors = (tones) => ({
@@ -67,6 +72,7 @@ function buildingGeometry(buildings) {
   const mesh = new THREE.BufferGeometry()
   mesh.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   mesh.setAttribute('color', new THREE.BufferAttribute(new Float32Array(positions.length), 3))
+  mesh.computeVertexNormals()
   const outline = new THREE.BufferGeometry()
   outline.setAttribute('position', new THREE.Float32BufferAttribute(lines, 3))
   return { mesh, outline, faces }
@@ -107,8 +113,12 @@ function Buildings({ city, needOfBuilding, tiers, sunDir, onPick }) {
 
   return (
     <>
-      <mesh geometry={mesh} onClick={(event) => onPick(event, buildingAt(faces, event.faceIndex))}>
+      <mesh geometry={mesh} castShadow onClick={(event) => onPick(event, buildingAt(faces, event.faceIndex))}>
         <meshBasicMaterial vertexColors polygonOffset polygonOffsetFactor={1} polygonOffsetUnits={1} />
+      </mesh>
+      {/* The colours stay flat, so a see-through copy on top shows the shadows falling on other buildings. */}
+      <mesh geometry={mesh} receiveShadow renderOrder={1}>
+        <shadowMaterial color={SHADOW_COLOR} opacity={SHADOW_STRENGTH} depthWrite={false} />
       </mesh>
       <lineSegments geometry={outline}>
         <lineBasicMaterial color="#ffffff" />
@@ -233,6 +243,25 @@ function Label({ point, level = 0, children }) {
   )
 }
 
+// The sun: the only light in the scene, there to cast shadows. The building colours don't depend on it.
+function Sun({ direction }) {
+  return (
+    <directionalLight
+      position={direction.map((d) => d * SUN_DISTANCE)}
+      castShadow
+      shadow-mapSize={[4096, 4096]}
+      shadow-bias={-0.0004}
+      shadow-normalBias={0.8}
+      shadow-camera-left={-SHADOW_REACH}
+      shadow-camera-right={SHADOW_REACH}
+      shadow-camera-top={SHADOW_REACH}
+      shadow-camera-bottom={-SHADOW_REACH}
+      shadow-camera-near={100}
+      shadow-camera-far={SUN_DISTANCE + SHADOW_REACH * 1.5}
+    />
+  )
+}
+
 export default function Scene({ city, needOfBuilding, sunDir, shade, tiers, areas, ways, placeWay, missing, startPoint, onPick }) {
   // A drag to orbit also ends in a click, so only a press that barely moved counts as choosing a point.
   const pick = (event, building = null) => {
@@ -246,6 +275,7 @@ export default function Scene({ city, needOfBuilding, sunDir, shade, tiers, area
 
   return (
     <Canvas
+      shadows
       flat
       frameloop="demand"
       dpr={[1, 2]}
@@ -253,12 +283,17 @@ export default function Scene({ city, needOfBuilding, sunDir, shade, tiers, area
       fallback={<p className="notice">This page needs WebGL, which your browser has turned off.</p>}
     >
       <color attach="background" args={[OUTSIDE]} />
+      <Sun direction={sunDir} />
 
       <mesh rotation-x={-Math.PI / 2} onClick={pick}>
         <planeGeometry args={[20000, 20000]} />
         <meshBasicMaterial color={OUTSIDE} />
       </mesh>
       <Ground plots={city.plots} />
+      <mesh rotation-x={-Math.PI / 2} position-y={0.15} receiveShadow renderOrder={1}>
+        <planeGeometry args={[7000, 7000]} />
+        <shadowMaterial color={SHADOW_COLOR} opacity={SHADOW_STRENGTH} depthWrite={false} />
+      </mesh>
 
       {missing.map(({ cell, share }) => (
         <FlatShape key={cell} polygons={[city.cells[cell].rings]} color="#E5007E" opacity={0.1 + 0.35 * share} height={0.2} />
