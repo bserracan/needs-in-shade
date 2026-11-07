@@ -449,8 +449,17 @@ export default function App() {
     <div className="app">
       <section className="panel">
         <header>
-          <h1>Daily needs in the shade</h1>
-          <p className="subtitle">Assessing Access to Daily Needs, Spatial Inequalities and Heat-Resilient Walking Routes in Weimar’s 15-Minute City</p>
+          {raining ? (
+            <>
+              <h1>Flood night in Weimar</h1>
+              <p className="subtitle">A Weimar-born father, who has never seen his town flood, thinks his way through the rain to the Fabrik community centre</p>
+            </>
+          ) : (
+            <>
+              <h1>Daily needs in the shade</h1>
+              <p className="subtitle">Assessing Access to Daily Needs, Spatial Inequalities and Heat-Resilient Walking Routes in Weimar’s 15-Minute City</p>
+            </>
+          )}
         </header>
 
         <div className="chips mode" role="group" aria-label="Choose a map">

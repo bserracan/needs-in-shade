@@ -15,7 +15,7 @@ const SHELTER_NEAR_STREET = 60 // metres from a building's middle to its street 
 const SHELTERS_OFFERED = 3
 
 // Twice the walking speed means everything else runs twice as fast too, so the story plays out the same, only quicker.
-const WET_PER_SECOND = 3.2 // in full rain, per real second, outside
+const WET_PER_SECOND = 2 // in full rain, per real second, outside
 const DRY_PER_SECOND = 1.2
 const TIRE_PER_SECOND = 0.7
 const REST_PER_SECOND = 1
