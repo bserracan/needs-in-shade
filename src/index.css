@@ -162,6 +162,134 @@ input:focus-visible {
   padding: 4px 10px;
 }
 
+.chips.mode {
+  margin-bottom: 12px;
+}
+
+.live-note {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--magenta);
+  background: var(--lawn);
+  font-weight: 600;
+}
+
+.storm-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.storm-actions button {
+  min-height: 34px;
+  padding: 4px 14px;
+}
+
+.storm-actions button:disabled {
+  border-color: var(--rule);
+  background: var(--rule);
+  color: var(--soft);
+  cursor: default;
+}
+
+.clock {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  margin: 4px 0 8px;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 44px 1fr 28px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bar progress {
+  width: 100%;
+  height: 10px;
+  accent-color: var(--magenta);
+}
+
+.bar b {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.thinking {
+  font-style: italic;
+}
+
+.log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.entry time {
+  color: var(--soft);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.entry.story,
+.entry.storm {
+  color: var(--soft);
+  font-size: 12.5px;
+}
+
+.entry.problem {
+  color: #b42318;
+  font-size: 12.5px;
+}
+
+.entry dl {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  gap: 2px 6px;
+  margin: 4px 0;
+}
+
+.entry dt {
+  font-family: var(--condensed);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.entry dd {
+  margin: 0;
+}
+
+.entry.refused dd:nth-of-type(2) {
+  color: #b42318;
+}
+
+.entry summary {
+  color: var(--soft);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.entry pre {
+  overflow-x: auto;
+  margin: 4px 0 0;
+  padding: 6px 8px;
+  background: var(--lawn);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
 .date,
 .time {
   display: flex;
@@ -249,6 +377,14 @@ input:focus-visible {
   content: '';
 }
 
+.bubble.thought {
+  width: 230px;
+  white-space: normal;
+  font-weight: 400;
+  line-height: 1.25;
+  text-align: left;
+}
+
 .legend {
   position: fixed;
   top: 12px;
@@ -304,6 +440,10 @@ input:focus-visible {
   background: repeating-linear-gradient(90deg, var(--ink) 0 4px, transparent 4px 7px);
 }
 
+.line.dashed.route {
+  background: repeating-linear-gradient(90deg, #d98a10 0 4px, transparent 4px 7px);
+}
+
 .swatch {
   flex: none;
   display: inline-block;
@@ -350,5 +490,104 @@ input:focus-visible {
 
   .map > div:first-child {
     height: 62vh !important;
+  }
+}
+
+/* The father's shocked word, in the log. */
+.shock {
+  margin-right: 2px;
+  color: var(--magenta);
+  font-family: var(--condensed);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Lightning around the screen, each time a street is clicked in the rain. Only an effect: clicks pass through it. */
+.lightning {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.lightning .flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(210, 225, 255, 0.05), rgba(210, 225, 255, 0.45));
+  opacity: 0;
+  animation: lightning-flash 700ms ease-out forwards;
+}
+
+.lightning svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px #b9d4ff) drop-shadow(0 0 14px #7aa7ff);
+}
+
+.lightning polyline {
+  fill: none;
+  stroke: #f4f8ff;
+  stroke-width: 3;
+  stroke-linejoin: miter;
+  vector-effect: non-scaling-stroke;
+}
+
+.lightning polyline.branch {
+  stroke-width: 1.5;
+}
+
+.lightning g {
+  opacity: 0;
+  animation: lightning-bolt 700ms linear forwards;
+}
+
+@keyframes lightning-flash {
+  0% { opacity: 0; }
+  8% { opacity: 1; }
+  25% { opacity: 0.15; }
+  35% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+@keyframes lightning-bolt {
+  0% { opacity: 0; }
+  5% { opacity: 1; }
+  22% { opacity: 0.2; }
+  32% { opacity: 1; }
+  70% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* For people who turn off motion: no flicker, the bolts just fade. */
+@media (prefers-reduced-motion: reduce) {
+  .lightning .flash {
+    display: none;
+  }
+  .lightning g {
+    animation: lightning-fade 900ms ease-out forwards;
+  }
+}
+
+@keyframes lightning-fade {
+  0% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+/* The Fabrik's name pops up. */
+.bubble.pop {
+  animation: bubble-pop 260ms ease-out;
+}
+
+@keyframes bubble-pop {
+  0% { opacity: 0; transform: scale(0.6); }
+  70% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble.pop {
+    animation: none;
   }
 }

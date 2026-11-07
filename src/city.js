@@ -23,6 +23,7 @@ export function buildCity({ kit, buildings, plots, graph, zensus }) {
   const buildingList = buildings.features.map((f) => {
     const rings = f.geometry.coordinates.map((ring) => ring.map(project))
     return {
+      id: String(f.properties.id),
       height: f.properties.height,
       use: f.properties.use ?? 'undefined', // one building has no use recorded
       floorArea: f.properties.floor_area_m2 ?? {},

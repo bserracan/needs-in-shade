@@ -44,3 +44,25 @@ export const GROUND = {
   'standing water': '#D3E7EE',
 }
 export const PLOT_LINE = '#CFDFAE'
+
+// The rainy evening: cool blue-grey everywhere, with warm light as the only accent.
+export const NIGHT = {
+  outside: '#141A28',
+  building: { roof: '#3A4661', wall: '#2B354C', shade: '#222A3E' },
+  buildingLine: '#55617D',
+  factory: { roof: '#FFC46B', wall: '#F6A623', shade: '#D98A10' },
+  lit: { roof: '#FFE7A8', wall: '#FFD36B', shade: '#E8B54C' },
+  plotLine: '#232C40',
+  street: '#7E8CA8',
+  flood: '#38B6FF',
+  route: '#FFC46B',
+  rain: '#C5D8F2',
+  ground: {
+    default: '#1A2133',
+    recreation: '#1D2B2E',
+    cemetery: '#1D2B2E',
+    square: '#232B3F',
+    'flowing water': '#173049',
+    'standing water': '#173049',
+  },
+}

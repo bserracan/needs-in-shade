@@ -18,6 +18,24 @@ npm run dev     start the app at http://localhost:5173
 3. Click a number under "Who misses out" to see those residents on the map.
 4. Change the date and the time to see the buildings' shadows move across the city.
 
+## Rainy evening: a family that thinks
+
+Switch to **Rainy evening** for a second, imagined story on the same streets. Weimar has an abandoned factory, restored as a community centre, the Fabrik. In this story it stands where the Weimar Atrium shopping centre is today. It's pouring after sunset, and a family with a pram is trying to get there. Claude plays the father: born and raised in Weimar, he has never seen it flood, so each time he changes his route he says one shocked German word from a fixed list (Echt jetzt?, Krass!, Heiliger Strohsack! and others). You play the storm: each street you click strikes lightning.
+
+1. Click a street to place the family, then press Start.
+2. Click a street to flood it. Click it again to clear it.
+3. Read what they noticed, what they did and why, in the log and above the family on the map.
+
+**What it notices:** where the family is, how wet and tired they are, the rain, the walk to the Fabrik, flooded streets on their way, and nearby buildings they could shelter in.
+
+**When it thinks:** when the walk starts, when a street floods on their way, when they get very wet, when they reach a shelter, and every 30 seconds if nothing else happens (every 10 seconds while sheltering). Never more than once in 4 seconds, or 30 times in a walk.
+
+**What it does:** it chooses one action, with a reason: keep going, go around, shelter or head out. The app checks that the action is possible and carries it out.
+
+**Only on localhost.** The thinking runs through a small connection in the dev server (`server/family-brain.js`), which calls `claude -p` with no tools on the Claude account of whoever runs it. No key is stored. On the live page that connection doesn't exist, so the page says the family only thinks on localhost and they just follow the shortest way. To change who the family is, edit the description at the top of `server/family-brain.js` and restart `npm run dev`.
+
+**Real and imagined.** The streets, the buildings and the sunset time for 7 November are real. The rain, floods, the family and how wet and tired they get are invented rules, not measurements. The amber building is the real footprint of the Weimar Atrium (Friedensstraße 1, found by its OpenStreetMap position), which plays the Fabrik in this story: it isn't really an abandoned factory or a community centre. Which buildings are open is a guess from their use.
+
 ## Method
 
 - **Walking.** 4.8 km/h, which is 80 m per minute, along the pedestrian network, from the node nearest the click. If no walkable street is within 100 m, the app says so.
@@ -65,3 +83,4 @@ Headline font: Barlow Condensed (SIL Open Font License), stored with the site.
 2. I decided: I decided to ask which daily needs are within 15 minutes, who misses out and what the shadiest way there is, and to open the map on 1 June at 17:00 in my own colour-block style.
 3. The agent did: built the walking map from the starter prompt, added the daily-needs, who-misses-out and shadiest-way features in my style guide, and cross-checked the numbers with a second geometry tool.
 4. I checked: I checked by clicking several start points and buildings, moving the time slider to see the shade and routes change, and confirming that a far-away walk took a believable time for its distance.
+5. For the rainy evening: I decided on the story of the factory and the family trying to reach somewhere dry. The agent built the mode, the rules and the connection to Claude, whose family decisions run on the model Claude Haiku.

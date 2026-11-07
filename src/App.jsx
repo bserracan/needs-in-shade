@@ -2,11 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import '@fontsource/barlow-condensed/300.css'
 import '@fontsource/barlow-condensed/700.css'
 import Scene from './Scene.jsx'
+import StormPanel from './StormPanel.jsx'
+import Lightning from './Lightning.jsx'
+import { useStorm } from './useStorm.js'
 import { buildCity, computeShade, shadeShare, sunnyMetres } from './city.js'
 import { findStart, walk } from './walk.js'
 import { NEEDS, TESTS, buildNeeds, waysToNeeds, waysToPlace, whoMissesOut } from './needs.js'
 import { QUICK_DAYS, clockTime, compassWord, dayFromNumber, daylight, sunAt, sunDirection } from './sun.js'
-import { GROUND, REACH, STREET_SHADE, STREET_SUN, USE_GROUPS } from './palette.js'
+import { GROUND, NIGHT, REACH, STREET_SHADE, STREET_SUN, USE_GROUPS } from './palette.js'
 
 const ATTRIBUTION =
   'Buildings: 3D building models LoD2 © GDI-Th (dl-de/by-2-0). Land use and pedestrian network: Egor Gaydukov, InfAU, Bauhaus-Universität Weimar. Census grid: Zensus 2022, © Statistische Ämter des Bundes und der Länder (dl-de/by-2-0).'
@@ -109,6 +112,34 @@ function Legend() {
         </li>
         <li>
           <span className="swatch" style={{ background: 'rgba(229, 0, 126, 0.4)' }} /> Who misses out
+        </li>
+      </ul>
+    </aside>
+  )
+}
+
+function StormLegend() {
+  return (
+    <aside className="legend" aria-label="Legend">
+      <h2>Rainy evening</h2>
+      <ul>
+        <li>
+          <House tones={NIGHT.factory} /> The Fabrik, in the Atrium's place (imagined)
+        </li>
+        <li>
+          <House tones={NIGHT.lit} /> A shelter on offer
+        </li>
+        <li>
+          <House tones={NIGHT.building} /> Other buildings
+        </li>
+        <li>
+          <span className="swatch" style={{ background: 'var(--magenta)', borderRadius: '50%', width: 12 }} /> The family
+        </li>
+        <li>
+          <span className="line dashed route" /> The way they're taking
+        </li>
+        <li>
+          <span className="line thick" style={{ background: NIGHT.flood }} /> Flooded street
         </li>
       </ul>
     </aside>
@@ -321,6 +352,10 @@ export default function App() {
   const [place, setPlace] = useState(null)
   const [notice, setNotice] = useState(null)
   const [chosen, setChosen] = useState({ need: 'food', test: 'within15' })
+  const [mode, setMode] = useState('sun')
+  const [fabrikPinned, setFabrikPinned] = useState(false) // the Fabrik's name stays on after a click on it
+  const [strikes, setStrikes] = useState(0) // counts street clicks in the rain, each one strikes lightning
+  const raining = mode === 'rain'
 
   useEffect(() => {
     loadKit().then(setRaw).catch((e) => setError(e.message))
@@ -328,6 +363,7 @@ export default function App() {
 
   const city = useMemo(() => raw && buildCity(raw), [raw])
   const needs = useMemo(() => city && buildNeeds(city), [city])
+  const storm = useStorm(city, raining)
 
   const day = useMemo(() => dayFromNumber(dayNumber), [dayNumber])
   const range = useMemo(() => city && daylight(day, city.center), [city, day])
@@ -357,7 +393,39 @@ export default function App() {
     return [...who.table[chosen.need][chosen.test].byCell].map(([cell, share]) => ({ cell, share }))
   }, [who, chosen])
 
+  const stormScene = useMemo(
+    () =>
+      raining && storm.world
+        ? {
+            factory: storm.world.factory,
+            factoryCentre: storm.world.factoryCentre,
+            lit: storm.view.lit,
+            floodLines: storm.view.floodLines,
+            route: storm.view.route,
+            focus: storm.view.focus,
+            placed: storm.view.placed,
+            started: storm.view.phase !== 'placing' && storm.view.phase !== 'ready',
+            thought: storm.view.thought,
+            thinking: storm.view.thinking,
+            chatter: storm.view.chatter,
+            fabrikPinned,
+            rainStrength: storm.view.rainStrength,
+          }
+        : null,
+    [raining, storm.world, storm.view, fabrikPinned],
+  )
+
   const pick = (point, building) => {
+    if (raining) {
+      // A click on the Fabrik shows or hides its name. Any other click hides it and goes to the story.
+      if (building !== null && building === storm.world?.factory) {
+        setFabrikPinned((shown) => !shown)
+        return
+      }
+      setFabrikPinned(false)
+      if (storm.click(point) === 'street') setStrikes((n) => n + 1)
+      return
+    }
     // Once you have a start, a food, health or school building becomes the place to walk to.
     if (start !== null && building !== null && needs.needOfBuilding[building]) {
       setNotice(null)
@@ -385,6 +453,19 @@ export default function App() {
           <p className="subtitle">Assessing Access to Daily Needs, Spatial Inequalities and Heat-Resilient Walking Routes in Weimar’s 15-Minute City</p>
         </header>
 
+        <div className="chips mode" role="group" aria-label="Choose a map">
+          <button className={raining ? '' : 'active'} aria-pressed={!raining} onClick={() => setMode('sun')}>
+            Sun and shade
+          </button>
+          <button className={raining ? 'active' : ''} aria-pressed={raining} onClick={() => setMode('rain')}>
+            Rainy evening
+          </button>
+        </div>
+
+        {raining ? (
+          <StormPanel storm={storm} />
+        ) : (
+          <>
         {notice && <p className="hint alert">{notice}</p>}
         {start === null && !notice && <p className="hint">Click anywhere on the map to start your walk.</p>}
 
@@ -471,6 +552,8 @@ export default function App() {
           <li>Places count as reached at the junction nearest their middle, as the kit has no entrances. Nothing outside the kit is counted, so walks and places stop at its edge, and people near the edge may only seem to miss out.</li>
           <li>Roofs are drawn flat because the kit only has one height per building, measured to the top of the roof.</li>
         </ul>
+          </>
+        )}
       </section>
 
       <section className="map" aria-label="3D map of Weimar">
@@ -479,18 +562,21 @@ export default function App() {
           needOfBuilding={needs.needOfBuilding}
           sunDir={sunDir}
           shade={shade}
-          tiers={measured?.tiers}
-          areas={measured?.areas}
-          ways={ways}
-          placeWay={placeWay}
-          missing={missing}
-          startPoint={start !== null ? city.nodes[start] : null}
+          tiers={raining ? undefined : measured?.tiers}
+          areas={raining ? undefined : measured?.areas}
+          ways={raining ? null : ways}
+          placeWay={raining ? null : placeWay}
+          missing={raining ? [] : missing}
+          startPoint={!raining && start !== null ? city.nodes[start] : null}
+          storm={stormScene}
+          stormPosition={storm.position}
           onPick={pick}
         />
         <p className="attribution">{ATTRIBUTION}</p>
       </section>
 
-      <Legend />
+      {raining ? <StormLegend /> : <Legend />}
+      {raining && strikes > 0 && <Lightning key={strikes} />}
     </div>
   )
 }
